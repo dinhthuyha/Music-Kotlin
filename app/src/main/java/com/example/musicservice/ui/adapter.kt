@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicservice.R
-import com.example.musicservice.Song
+import com.example.musicservice.data.model.Song
 
 class adapter() : RecyclerView.Adapter<ViewHolder>() {
     var onItemClick: (Song, Int) -> Unit = { _, _ -> }

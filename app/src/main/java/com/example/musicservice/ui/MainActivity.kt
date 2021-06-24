@@ -8,22 +8,22 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.musicservice.R
-import com.example.musicservice.Song
+import com.example.musicservice.data.model.Song
+import com.example.musicservice.data.source.SongRepository
 import com.example.musicservice.service.MyService
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainContract.View {
     private var songList = mutableListOf<Song>()
     private val TAG = "MainActivity"
 
     private lateinit var mService: MyService
     private var boundService = false
-    private var playIntent: Intent? = null
+    private var adapter = adapter()
+    private var presenter: MainPresenter? = null
     private var click = false
-    private var adapter= adapter()
 
     var connService = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -44,8 +44,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //bindView
-        initView()
+
 
     }
 
@@ -58,17 +57,7 @@ class MainActivity : AppCompatActivity() {
         songList.add(
             Song("https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview114/v4/4d/b9/3d/4db93deb-adc4-dbba-aa8b-e71ce6a99222/mzaf_1431476923263111215.plus.aac.p.m4a")
         )
-        rv.layoutManager = LinearLayoutManager(this@MainActivity)
-        adapter.updateData(songList)
-        rv.adapter = adapter.apply {
-            onItemClick = { item, position ->
 
-                //Log.d(TAG, "onServiceConnected: " + item.url)
-                mService.playSong(position)
-
-
-            }
-        }
     }
 
     override fun onStart() {
@@ -81,6 +70,31 @@ class MainActivity : AppCompatActivity() {
             )
             startService(intent)
         }
+        presenter = MainPresenter(this, SongRepository.getInstance())
+        presenter?.handle()
 
+    }
+
+    override fun updateView(song: MutableList<Song>) {
+        Log.d(TAG, "updateView: " + song.size)
+        songList.clear()
+        songList.addAll(song)
+        rv.layoutManager = LinearLayoutManager(this@MainActivity)
+        adapter.updateData(songList)
+        rv.adapter = adapter.apply {
+            onItemClick = { item, position ->
+
+                if (click)
+                    mService.pause(position)
+                else{
+                    mService.playSong(position)
+
+                }
+                click= !click
+
+
+
+            }
+        }
     }
 }

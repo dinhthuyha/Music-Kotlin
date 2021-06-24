@@ -9,16 +9,16 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
-import com.example.musicservice.Song
+import com.example.musicservice.data.model.Song
 
 class MyService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
     MediaPlayer.OnCompletionListener {
-    private  val TAG = "MyService"
+    private val TAG = "MyService"
     private var player: MediaPlayer? = null
 
     //list song
     private var songs: MutableList<Song>? = null
-    private var songPostion=0
+    private var songPostion = 0
     private val musicBinder: IBinder = MusicBinder()
 
     override fun onCreate() {
@@ -44,6 +44,7 @@ class MyService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnError
         }
         return false
     }
+
     override fun onPrepared(mp: MediaPlayer?) {
         //start playback
         mp?.let { it.start() }
@@ -58,19 +59,20 @@ class MyService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnError
 
     override fun onCompletion(mp: MediaPlayer?) {
         //check xem da phat den cuoi danh sach chua
-       player?.let {
-           if( it.currentPosition>0)
-               mp?.reset()
-                playNext()
+        player?.let {
+            if (it.currentPosition > 0)
+                mp?.reset()
+            playNext()
 
-       }
+        }
 
     }
-    public fun playSong( pos:Int){
+
+    public fun playSong(pos: Int) {
         //play
-        songPostion=pos
+        songPostion = pos
         player!!.reset()
-        var playSong= songs?.get(songPostion)
+        var playSong = songs?.get(songPostion)
 
         player?.let {
             it.setDataSource(applicationContext, Uri.parse(playSong?.url.toString()))
@@ -79,18 +81,27 @@ class MyService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnError
 
     }
 
+    fun pause(pos: Int) {
+        player!!.pause()
+    }
+
     private fun playNext() {
         songPostion++
-        if( songPostion>=songs!!.size)
-            songPostion=0
-    }
-    public fun playPre(){
-        songPostion--
-        if( songPostion<0) songPostion=songs!!.size-1
+        if (songPostion >= songs!!.size) {
+            songPostion = 0
+        }
         playSong(songPostion)
 
     }
-    fun pausePlayer()= player?.pause()
+
+    public fun playPre() {
+        songPostion--
+        if (songPostion < 0) songPostion = songs!!.size - 1
+        playSong(songPostion)
+
+    }
+
+    fun pausePlayer() = player?.pause()
 
     fun setList(theSongs: MutableList<Song>) {
         songs = theSongs
@@ -112,7 +123,7 @@ class MyService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnError
 
     }
 
-   inner class MusicBinder : Binder() {
+    inner class MusicBinder : Binder() {
         fun getService(): MyService = this@MyService
 
     }

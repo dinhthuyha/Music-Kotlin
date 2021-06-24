@@ -2,14 +2,14 @@ package com.example.musicservice.ui
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.example.musicservice.Song
+import com.example.musicservice.data.model.Song
 import kotlinx.android.synthetic.main.item.view.*
 
 class ViewHolder(
     itemView: View,
     onItemClick: (Song, Int) -> Unit
 ) : RecyclerView.ViewHolder(itemView) {
-    private var itemData:Song ?=null
+    private var itemData: Song?=null
     init {
         itemView.setOnClickListener { itemData?.let { onItemClick(it, adapterPosition) } }
     }
